@@ -1,9 +1,5 @@
-from datetime import datetime
-
-import matplotlib
-matplotlib.use('agg')
+import matplotlib; matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import numpy as np
 import matplotlib.dates as mdates
 import pandas as pd
 
@@ -112,8 +108,8 @@ def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
         ax.vlines(intervals[-1], y - start_tick_y_length,
                   y + start_tick_y_length, linestyles=(0, (1, 1)), **kwargs)
     # arrow_start = forecast.end
-    # ax.arrow(forecast.start, y - start_tick_y_length, y + start_tick_y_length,
-    #           **kwargs)
+    # ax.arrow(forecast.start, y - start_tick_y_length,
+    #          y + start_tick_y_length, **kwargs)
 
 
 def annotate_with_brace(ax, xy, color):
@@ -144,7 +140,8 @@ def format_xaxis(fig, ax):
 
 def remove_left_right_top_axes(ax):
     plt.setp((ax.get_yticklabels() + ax.get_yticklines() +
-            [v for k, v in ax.spines.items() if k != 'bottom']), visible=False)
+             [v for k, v in ax.spines.items() if k != 'bottom']),
+             visible=False)
 
 
 def initial_axes_setup():
@@ -170,11 +167,8 @@ def make_concat_timeline():
     runs = [run1, run2, run3]
 
     # define concat forecasts
-    hour_ahead_15min_int = Forecast('1h', '15min', 4, '1h', 'any',
+    hour_ahead_15min_int = Forecast('1h', '15min', 12, '1h', 'any',
                                     '20180101 1300')
-    hour_ahead_15min_int.duration = pd.Timedelta('3h')
-    hour_ahead_15min_int.end = (hour_ahead_15min_int.start +
-                                hour_ahead_15min_int.duration)
 
     # draw each run
     for ii, run in enumerate(runs):
@@ -190,7 +184,7 @@ def make_concat_timeline():
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
-    ax.set(title="Forecast runs merged into evaluation forecasts")
+    ax.set(title="Forecast runs concatenated into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
     fig.savefig('timeline_concat.png')
@@ -222,7 +216,7 @@ def make_concat_timeline_1h():
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
-    ax.set(title="Forecast runs merged into evaluation forecasts")
+    ax.set(title="Forecast runs concatenated into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
     fig.savefig('timeline_concat_1h.png')
