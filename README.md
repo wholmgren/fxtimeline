@@ -3,7 +3,7 @@ fxtimeline
 
 `python timeline.py` will create...
 
-![timeline][timeline.png]
+![timeline](timeline.png)
 
 
 Requirements

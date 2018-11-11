@@ -60,6 +60,8 @@ class Forecast:
         Inclusion/exclusion determined by label.
     end: pandas.Timestamp
         Equal to start + duration. Inclusion/exclusion determined by label.
+    issue_time: pandas.Timestamp
+        Equal to start - lead_time_to_start
     label: str
     kind: str
     units: str
@@ -68,10 +70,10 @@ class Forecast:
                  intervals_per_submission, issue_frequency, value_type,
                  start, kind=None, label='left', units=''):
 
-        self.lead_time_to_start = lead_time_to_start
-        self.interval_duration = interval_duration
+        self.lead_time_to_start = pd.Timedelta(lead_time_to_start)
+        self.interval_duration = pd.Timedelta(interval_duration)
         self.intervals_per_submission = intervals_per_submission
-        self.issue_frequency = issue_frequency
+        self.issue_frequency = pd.Timedelta(issue_frequency)
         self.duration = \
             pd.Timedelta(interval_duration) * intervals_per_submission
         self.value_type = value_type
@@ -79,64 +81,39 @@ class Forecast:
         # For left-labeling, forecast is exclusive of end.
         # end is the first instant that is not part of the Forecast.
         self.end = self.start + self.duration
+        self.issue_time = self.start - self.lead_time_to_start
         self.kind = kind
         # determined by corresponding observations, provided here for
         # convenience
         self.units = units
 
-tz = 'UTC'
-start = pd.Timestamp('20180101 1200')
-end = pd.Timestamp('20180101 2100')
-freq = '5min'
-dates = pd.DatetimeIndex(start=start, end=end, freq=freq)
 
-# levels = np.array([-5, 5, -3, 3, -1, 1])
-fig, ax = plt.subplots(figsize=(10, 6))
+def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
+                           show_lead_time=False, show_last_tick=False,
+                           **kwargs):
+    if show_lead_time:
+        ax.hlines(y, xmin=forecast.issue_time, xmax=forecast.start,
+                linestyles=(0, (1, 1)), **kwargs)
+        ax.vlines(forecast.issue_time, y - start_tick_y_length,
+                y + start_tick_y_length, linestyles=(0, (1, 1)), **kwargs)
 
-start_end_delta = pd.Timedelta('5min')
-ax.set_xlim(start - start_end_delta, end + start_end_delta)
-ax.set_ylim(-1, 5)
-
-# Create the base line
-# start = datetime(2018, 1, 1, 12)
-# end = datetime(2018, 1, 1, 16)
-# ax.plot((start, end), (0, 0), 'k', alpha=.5)
-
-run1 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1200')
-run2 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1300')
-run3 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1400')
-runs = [run1, run2, run3]
-
-hour_ahead_15min_int = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1300')
-hour_ahead_15min_int.duration = pd.Timedelta('3h')
-hour_ahead_15min_int.end = (hour_ahead_15min_int.start +
-                            hour_ahead_15min_int.duration)
-
-hour_ahead_hour_int = Forecast('2h', '1h', 3, '1h', 'any', '20180101 1400')
-
-def draw_forecast_timeline(ax, y, forecast, **kwargs):
+    # main forecast line
     ax.hlines(y, xmin=forecast.start, xmax=forecast.end, **kwargs)
-    start_tick_y_length = .2
+    # forecast start tick
     ax.vlines(forecast.start, y - start_tick_y_length, y + start_tick_y_length,
               **kwargs)
+    # intervals ticks
     intervals = pd.DatetimeIndex(start=forecast.start, end=forecast.end,
                                  freq=forecast.interval_duration)
     ax.vlines(intervals[:-1], y - start_tick_y_length / 2,
               y + start_tick_y_length / 2, **kwargs)
-    # last tick should be longer and dashed
-    ax.vlines(intervals[-1], y - start_tick_y_length, y + start_tick_y_length,
-              linestyles=(0, (1, 1)), **kwargs)
+    if show_last_tick:
+        # last tick should be longer and dashed
+        ax.vlines(intervals[-1], y - start_tick_y_length,
+                  y + start_tick_y_length, linestyles=(0, (1, 1)), **kwargs)
     # arrow_start = forecast.end
     # ax.arrow(forecast.start, y - start_tick_y_length, y + start_tick_y_length,
     #           **kwargs)
-
-# Iterate through releases annotating each one
-for ii, run in enumerate(runs):
-    draw_forecast_timeline(ax, ii, run, color='g')
-
-draw_forecast_timeline(ax, len(runs), hour_ahead_15min_int, color='b')
-
-draw_forecast_timeline(ax, len(runs) + 1, hour_ahead_hour_int, color='r')
 
 
 def annotate_with_brace(ax, xy, color):
@@ -145,48 +122,82 @@ def annotate_with_brace(ax, xy, color):
                 rotation=90, color=color)
 
 
+def label_group(label, x, y, color, bracesize=24, fontsize=18):
+    ax.annotate('$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
+                horizontalalignment='left', verticalalignment='center',
+                color=color)
+    ax.annotate(label, xy=(pd.Timestamp(x) + pd.Timedelta('60min'), y),
+                fontsize=fontsize, textcoords='data',
+                horizontalalignment='left', verticalalignment='center',
+                color=color)
+
+
+def format_xaxis(fig, ax):
+    # Set the xticks formatting
+    # format xaxis with 3 month intervals
+    ax.get_xaxis().set_major_locator(mdates.HourLocator(interval=1))
+    ax.get_xaxis().set_minor_locator(
+        mdates.MinuteLocator(byminute=range(0, 60, 15)))
+    ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%H:%M"))
+    fig.autofmt_xdate()
+
+
+def remove_left_right_top_axes(ax):
+    plt.setp((ax.get_yticklabels() + ax.get_yticklines() +
+            [v for k, v in ax.spines.items() if k != 'bottom']), visible=False)
+
+
+figsize = (10, 6)
+fig, ax = plt.subplots(figsize=figsize)
+
+# initial axes set up
+start = pd.Timestamp('20180101 1200')
+end = pd.Timestamp('20180101 2100')
+start_end_delta = pd.Timedelta('5min')
+ax.set_xlim(start - start_end_delta, end + start_end_delta)
+ax.set_ylim(-1, 5)
+
+# define forecast runs
+run1 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1200')
+run2 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1300')
+run3 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1400')
+runs = [run1, run2, run3]
+
+# define merged forecasts
+hour_ahead_15min_int = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1300')
+hour_ahead_15min_int.duration = pd.Timedelta('3h')
+hour_ahead_15min_int.end = (hour_ahead_15min_int.start +
+                            hour_ahead_15min_int.duration)
+
+hour_ahead_hour_int = Forecast('2h', '1h', 3, '1h', 'any', '20180101 1400')
+
+# draw each run
+for ii, run in enumerate(runs):
+    draw_forecast_timeline(ax, ii, run, color='g')
+
+# draw the merged forecasts
+draw_forecast_timeline(ax, len(runs), hour_ahead_15min_int, color='b')
+draw_forecast_timeline(ax, len(runs) + 1, hour_ahead_hour_int, color='r')
+
+# indicate segments of runs for blue forecast
 annotate_with_brace(ax, ('20180101 1300', 0), 'b')
 annotate_with_brace(ax, ('20180101 1400', 1), 'b')
 annotate_with_brace(ax, ('20180101 1500', 2), 'b')
 
+# indicate segments of runs for red forecast
 annotate_with_brace(ax, ('20180101 1400', 0), 'r')
 annotate_with_brace(ax, ('20180101 1500', 1), 'r')
 annotate_with_brace(ax, ('20180101 1600', 2), 'r')
 
-ax.annotate('$\}$', xy=('20180101 1730', 1), fontsize=90, textcoords='data',
-            horizontalalignment='left', verticalalignment='center',
-            color='g')
-ax.annotate('Identically parsed\nforecast runs', xy=('20180101 1830', 1),
-            fontsize=18, textcoords='data',
-            horizontalalignment='left', verticalalignment='center',
-            color='g')
+# add the labels
+label_group('Identically parsed\nforecast runs', '20180101 1730', 1, 'g',
+            bracesize=90)
+label_group('A Forecast', '20180101 1730', 3, 'b')
+label_group('A Forecast', '20180101 1730', 4, 'r')
 
-ax.annotate('$\}$', xy=('20180101 1730', 3), fontsize=24, textcoords='data',
-            horizontalalignment='left', verticalalignment='center',
-            color='b')
-ax.annotate('Forecast: merged\nseries of...', xy=('20180101 1830', 3),
-            fontsize=18, textcoords='data',
-            horizontalalignment='left', verticalalignment='center',
-            color='b')
+# format x axis, title, remove other axes
+format_xaxis(fig, ax)
+ax.set(title="Forecast runs merged into evaluation forecasts")
+remove_left_right_top_axes(ax)
 
-ax.annotate('$\}$', xy=('20180101 1730', 4), fontsize=24, textcoords='data',
-            horizontalalignment='left', verticalalignment='center',
-            color='r')
-ax.annotate('Forecast: concatenated\nseries of...', xy=('20180101 1830', 4),
-            fontsize=18, textcoords='data',
-            horizontalalignment='left', verticalalignment='center',
-            color='r')
-
-ax.set(title="Forecast runs, Forecast concatenation, and Forecast merge")
-# Set the xticks formatting
-# format xaxis with 3 month intervals
-ax.get_xaxis().set_major_locator(mdates.HourLocator(interval=1))
-ax.get_xaxis().set_minor_locator(
-    mdates.MinuteLocator(byminute=range(0, 60, 15)))
-ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%H:%M"))
-fig.autofmt_xdate()
-
-# Remove components for a cleaner look
-plt.setp((ax.get_yticklabels() + ax.get_yticklines() +
-          [v for k, v in ax.spines.items() if k != 'bottom']), visible=False)
 plt.savefig('timeline.png')
