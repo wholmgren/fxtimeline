@@ -93,9 +93,9 @@ def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
                            **kwargs):
     if show_lead_time:
         ax.hlines(y, xmin=forecast.issue_time, xmax=forecast.start,
-                linestyles=(0, (1, 1)), **kwargs)
+                  linestyles=(0, (1, 1)), **kwargs)
         ax.vlines(forecast.issue_time, y - start_tick_y_length,
-                y + start_tick_y_length, linestyles=(0, (1, 1)), **kwargs)
+                  y + start_tick_y_length, linestyles=(0, (1, 1)), **kwargs)
 
     # main forecast line
     ax.hlines(y, xmin=forecast.start, xmax=forecast.end, **kwargs)
@@ -178,7 +178,7 @@ def make_concat_timeline():
 
     # draw each run
     for ii, run in enumerate(runs):
-        draw_forecast_timeline(ax, ii, run, color='g')
+        draw_forecast_timeline(ax, ii, run, color='g', show_lead_time=True)
 
     # draw concat forecast
     draw_forecast_timeline(ax, len(runs), hour_ahead_15min_int, color='b')
@@ -194,6 +194,38 @@ def make_concat_timeline():
     remove_left_right_top_axes(ax)
 
     fig.savefig('timeline_concat.png')
+
+
+def make_concat_timeline_1h():
+    fig, ax = initial_axes_setup()
+
+    # define forecast runs
+    run1 = Forecast('1h', '1h', 1, '1h', 'any', '20180101 1300')
+    run2 = Forecast('1h', '1h', 1, '1h', 'any', '20180101 1400')
+    run3 = Forecast('1h', '1h', 1, '1h', 'any', '20180101 1500')
+    runs = [run1, run2, run3]
+
+    # define concat forecasts
+    hour_ahead_hour_int = Forecast('2h', '1h', 3, '1h', 'any', '20180101 1300')
+
+    # draw each run
+    for ii, run in enumerate(runs):
+        draw_forecast_timeline(ax, ii, run, color='g', show_lead_time=True)
+
+    # draw concat forecast
+    draw_forecast_timeline(ax, len(runs), hour_ahead_hour_int, color='b')
+
+    # add the labels
+    label_group(ax, 'Identically parsed\nforecast runs', '20180101 1730', 1,
+                'g', bracesize=90)
+    label_group(ax, 'A Forecast', '20180101 1730', 3, 'b')
+
+    # format x axis, title, remove other axes
+    format_xaxis(fig, ax)
+    ax.set(title="Forecast runs merged into evaluation forecasts")
+    remove_left_right_top_axes(ax)
+
+    fig.savefig('timeline_concat_1h.png')
 
 
 def make_merged_timeline():
@@ -248,4 +280,5 @@ def make_merged_timeline():
 
 if __name__ == '__main__':
     make_concat_timeline()
+    make_concat_timeline_1h()
     make_merged_timeline()
