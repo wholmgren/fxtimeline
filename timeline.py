@@ -122,7 +122,7 @@ def annotate_with_brace(ax, xy, color):
                 rotation=90, color=color)
 
 
-def label_group(label, x, y, color, bracesize=24, fontsize=18):
+def label_group(ax, label, x, y, color, bracesize=24, fontsize=18):
     ax.annotate('$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
                 horizontalalignment='left', verticalalignment='center',
                 color=color)
@@ -147,57 +147,105 @@ def remove_left_right_top_axes(ax):
             [v for k, v in ax.spines.items() if k != 'bottom']), visible=False)
 
 
-figsize = (10, 6)
-fig, ax = plt.subplots(figsize=figsize)
+def initial_axes_setup():
+    figsize = (10, 6)
+    fig, ax = plt.subplots(figsize=figsize)
 
-# initial axes set up
-start = pd.Timestamp('20180101 1200')
-end = pd.Timestamp('20180101 2100')
-start_end_delta = pd.Timedelta('5min')
-ax.set_xlim(start - start_end_delta, end + start_end_delta)
-ax.set_ylim(-1, 5)
+    # initial axes set up
+    start = pd.Timestamp('20180101 1200')
+    end = pd.Timestamp('20180101 2100')
+    start_end_delta = pd.Timedelta('5min')
+    ax.set_xlim(start - start_end_delta, end + start_end_delta)
+    ax.set_ylim(-1, 5)
+    return fig, ax
 
-# define forecast runs
-run1 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1200')
-run2 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1300')
-run3 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1400')
-runs = [run1, run2, run3]
 
-# define merged forecasts
-hour_ahead_15min_int = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1300')
-hour_ahead_15min_int.duration = pd.Timedelta('3h')
-hour_ahead_15min_int.end = (hour_ahead_15min_int.start +
-                            hour_ahead_15min_int.duration)
+def make_concat_timeline():
+    fig, ax = initial_axes_setup()
 
-hour_ahead_hour_int = Forecast('2h', '1h', 3, '1h', 'any', '20180101 1400')
+    # define forecast runs
+    run1 = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1300')
+    run2 = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1400')
+    run3 = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1500')
+    runs = [run1, run2, run3]
 
-# draw each run
-for ii, run in enumerate(runs):
-    draw_forecast_timeline(ax, ii, run, color='g')
+    # define concat forecasts
+    hour_ahead_15min_int = Forecast('1h', '15min', 4, '1h', 'any',
+                                    '20180101 1300')
+    hour_ahead_15min_int.duration = pd.Timedelta('3h')
+    hour_ahead_15min_int.end = (hour_ahead_15min_int.start +
+                                hour_ahead_15min_int.duration)
 
-# draw the merged forecasts
-draw_forecast_timeline(ax, len(runs), hour_ahead_15min_int, color='b')
-draw_forecast_timeline(ax, len(runs) + 1, hour_ahead_hour_int, color='r')
+    # draw each run
+    for ii, run in enumerate(runs):
+        draw_forecast_timeline(ax, ii, run, color='g')
 
-# indicate segments of runs for blue forecast
-annotate_with_brace(ax, ('20180101 1300', 0), 'b')
-annotate_with_brace(ax, ('20180101 1400', 1), 'b')
-annotate_with_brace(ax, ('20180101 1500', 2), 'b')
+    # draw concat forecast
+    draw_forecast_timeline(ax, len(runs), hour_ahead_15min_int, color='b')
 
-# indicate segments of runs for red forecast
-annotate_with_brace(ax, ('20180101 1400', 0), 'r')
-annotate_with_brace(ax, ('20180101 1500', 1), 'r')
-annotate_with_brace(ax, ('20180101 1600', 2), 'r')
+    # add the labels
+    label_group(ax, 'Identically parsed\nforecast runs', '20180101 1730', 1,
+                'g', bracesize=90)
+    label_group(ax, 'A Forecast', '20180101 1730', 3, 'b')
 
-# add the labels
-label_group('Identically parsed\nforecast runs', '20180101 1730', 1, 'g',
-            bracesize=90)
-label_group('A Forecast', '20180101 1730', 3, 'b')
-label_group('A Forecast', '20180101 1730', 4, 'r')
+    # format x axis, title, remove other axes
+    format_xaxis(fig, ax)
+    ax.set(title="Forecast runs merged into evaluation forecasts")
+    remove_left_right_top_axes(ax)
 
-# format x axis, title, remove other axes
-format_xaxis(fig, ax)
-ax.set(title="Forecast runs merged into evaluation forecasts")
-remove_left_right_top_axes(ax)
+    fig.savefig('timeline_concat.png')
 
-plt.savefig('timeline.png')
+
+def make_merged_timeline():
+    fig, ax = initial_axes_setup()
+
+    # define forecast runs
+    run1 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1200')
+    run2 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1300')
+    run3 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1400')
+    runs = [run1, run2, run3]
+
+    # define merged forecasts
+    hour_ahead_15min_int = Forecast('1h', '15min', 4, '1h', 'any',
+                                    '20180101 1300')
+    hour_ahead_15min_int.duration = pd.Timedelta('3h')
+    hour_ahead_15min_int.end = (hour_ahead_15min_int.start +
+                                hour_ahead_15min_int.duration)
+
+    hour_ahead_hour_int = Forecast('2h', '1h', 3, '1h', 'any', '20180101 1400')
+
+    # draw each run
+    for ii, run in enumerate(runs):
+        draw_forecast_timeline(ax, ii, run, color='g')
+
+    # draw the merged forecasts
+    draw_forecast_timeline(ax, len(runs), hour_ahead_15min_int, color='b')
+    draw_forecast_timeline(ax, len(runs) + 1, hour_ahead_hour_int, color='r')
+
+    # indicate segments of runs for blue forecast
+    annotate_with_brace(ax, ('20180101 1300', 0), 'b')
+    annotate_with_brace(ax, ('20180101 1400', 1), 'b')
+    annotate_with_brace(ax, ('20180101 1500', 2), 'b')
+
+    # indicate segments of runs for red forecast
+    annotate_with_brace(ax, ('20180101 1400', 0), 'r')
+    annotate_with_brace(ax, ('20180101 1500', 1), 'r')
+    annotate_with_brace(ax, ('20180101 1600', 2), 'r')
+
+    # add the labels
+    label_group(ax, 'Identically parsed\nforecast runs', '20180101 1730', 1,
+                'g', bracesize=90)
+    label_group(ax, 'A Forecast', '20180101 1730', 3, 'b')
+    label_group(ax, 'A Forecast', '20180101 1730', 4, 'r')
+
+    # format x axis, title, remove other axes
+    format_xaxis(fig, ax)
+    ax.set(title="Forecast runs merged into evaluation forecasts")
+    remove_left_right_top_axes(ax)
+
+    fig.savefig('timeline_merged.png')
+
+
+if __name__ == '__main__':
+    make_concat_timeline()
+    make_merged_timeline()
