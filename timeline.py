@@ -100,10 +100,11 @@ def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
                            interval_tick_y_length=0.125, show_lead_time=False,
                            show_last_tick=False, **kwargs):
     if show_lead_time:
+        dashing = (2, 1)
         ax.hlines(y, xmin=forecast.issue_time, xmax=forecast.start,
-                  linestyles=(0, (1, 1)), **kwargs)
+                  linestyles=(0, dashing), **kwargs)
         ax.vlines(forecast.issue_time, y - start_tick_y_length,
-                  y + start_tick_y_length, linestyles=(0, (1, 1)), **kwargs)
+                  y + start_tick_y_length, linestyles=(0.5, dashing), **kwargs)
 
     # main forecast line
     ax.hlines(y, xmin=forecast.start, xmax=forecast.end, **kwargs)
