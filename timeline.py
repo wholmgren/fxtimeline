@@ -1,4 +1,13 @@
-import matplotlib; matplotlib.use('agg')
+import matplotlib as mpl
+mpl.use('agg')
+mpl.rcParams['lines.linewidth'] = 3  # 1.5 default
+mpl.rcParams['axes.linewidth'] = 1.6  # 0.8 default
+mpl.rcParams['axes.titlesize'] = 'xx-large'  # large default
+mpl.rcParams['xtick.major.size'] = 7  # 3.5 default
+mpl.rcParams['xtick.minor.size'] = 4  # 2 default
+mpl.rcParams['xtick.major.width'] = 1.6  # 0.8 default
+mpl.rcParams['xtick.minor.width'] = 1.2  # 0.6 default
+mpl.rcParams['xtick.labelsize'] = 'x-large'  # medium default
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
@@ -85,8 +94,8 @@ class Forecast:
 
 
 def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
-                           show_lead_time=False, show_last_tick=False,
-                           **kwargs):
+                           interval_tick_y_length=0.125, show_lead_time=False,
+                           show_last_tick=False, **kwargs):
     if show_lead_time:
         ax.hlines(y, xmin=forecast.issue_time, xmax=forecast.start,
                   linestyles=(0, (1, 1)), **kwargs)
@@ -101,8 +110,8 @@ def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
     # intervals ticks
     intervals = pd.DatetimeIndex(start=forecast.start, end=forecast.end,
                                  freq=forecast.interval_duration)
-    ax.vlines(intervals[:-1], y - start_tick_y_length / 2,
-              y + start_tick_y_length / 2, **kwargs)
+    ax.vlines(intervals[:-1], y - interval_tick_y_length,
+              y + interval_tick_y_length, **kwargs)
     if show_last_tick:
         # last tick should be longer and dashed
         ax.vlines(intervals[-1], y - start_tick_y_length,
