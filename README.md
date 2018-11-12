@@ -1,7 +1,8 @@
 fxtimeline
 ==========
 
-`python timeline.py` will create the following images.
+`python timeline.py` will create the following images in both png (first) and
+svg (second) format.
 
 timeline_concat
 ---------------
@@ -16,7 +17,10 @@ a single evaluation forecast (blue). The parameters are:
 5.	Value type: Any
 6.  Interval label: Left
 
+png
 ![timeline concat](timeline_concat.png)
+
+svg
 ![timeline concat](timeline_concat.svg)
 
 
@@ -33,7 +37,10 @@ a single evaluation forecast (blue). The parameters are:
 5.	Value type: Any
 6.  Interval label: Left
 
+png
 ![timeline concat 1h](timeline_concat_1h.png)
+
+svg
 ![timeline concat 1h](timeline_concat_1h.svg)
 
 
@@ -70,7 +77,10 @@ The red evaluation forecast parameters are:
 5.	Value type: Any
 6.  Interval label: Left
 
+png
 ![timeline merged](timeline_merged.png)
+
+svg
 ![timeline merged](timeline_merged.svg)
 
 

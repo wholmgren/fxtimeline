@@ -346,14 +346,15 @@ def make_merged_timeline():
 
 
 if __name__ == '__main__':
+    dpi = 150
     fig = make_concat_timeline()
     fig.savefig('timeline_concat.svg')
-    fig.savefig('timeline_concat.png')
+    fig.savefig('timeline_concat.png', dpi=dpi)
 
     fig = make_concat_timeline_1h()
     fig.savefig('timeline_concat_1h.svg')
-    fig.savefig('timeline_concat_1h.png')
+    fig.savefig('timeline_concat_1h.png', dpi=dpi)
 
     fig = make_merged_timeline()
     fig.savefig('timeline_merged.svg')
-    fig.savefig('timeline_merged.png')
+    fig.savefig('timeline_merged.png', dpi=dpi)
