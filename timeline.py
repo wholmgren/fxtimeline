@@ -79,13 +79,17 @@ class Forecast:
                  start, kind=None, label='left', units=''):
 
         self.lead_time_to_start = pd.Timedelta(lead_time_to_start)
+        self.lead_time_to_start_str = lead_time_to_start
         self.interval_duration = pd.Timedelta(interval_duration)
+        self.interval_duration_str = interval_duration
         self.intervals_per_submission = intervals_per_submission
         self.issue_frequency = pd.Timedelta(issue_frequency)
+        self.issue_frequency_str = issue_frequency
         self.duration = \
             pd.Timedelta(interval_duration) * intervals_per_submission
         self.value_type = value_type
         self.start = pd.Timestamp(start)
+        self.start_str = start
         # For left-labeling, forecast is exclusive of end.
         # end is the first instant that is not part of the Forecast.
         self.end = self.start + self.duration
@@ -128,6 +132,7 @@ def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
 def curly(ax, x, y, scale, color):
     # adapted from
     # https://stackoverflow.com/questions/50039667/matplotlib-scale-text-curly-brackets
+    # doesn't behave as expected
     tp = TextPath((0, 0), "}", size=.2)
     trans = mtrans.Affine2D().scale(1, scale) + \
         mtrans.Affine2D().translate(0.5, y/5) + ax.transAxes
@@ -172,8 +177,9 @@ def remove_left_right_top_axes(ax):
 
 
 def initial_axes_setup():
-    figsize = (10, 6)
-    fig, ax = plt.subplots(figsize=figsize)
+    figsize = (11, 6)
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_axes([.17, .12, .75, .8])
 
     # initial axes set up
     start = pd.Timestamp('20180101 1200')
@@ -182,6 +188,34 @@ def initial_axes_setup():
     ax.set_xlim(start - start_end_delta, end + start_end_delta)
     ax.set_ylim(-1, 5)
     return fig, ax
+
+
+def add_stats_table(ax, forecasts):
+    """
+    Parameters
+    ----------
+    ax: matplotlib.Axes
+    forecasts: list of (color, Forecast) tuples
+    """
+    names = ['Lead time to start', 'Interval duration',
+             'Intervals / submission', 'Issue frequency', 'Value Type', ]
+             # 'Interval label']
+
+    xpos = .02
+    ypos = .87
+    kwargs = dict(horizontalalignment='left', verticalalignment='top',
+                  transform=ax.figure.transFigure, fontsize=12)
+    ax.text(xpos, ypos, '\n'.join(names), **kwargs)
+
+    offset = 0.18
+    spacing = 0.07
+    attrs = ['lead_time_to_start_str', 'interval_duration_str',
+             'intervals_per_submission', 'issue_frequency_str', 'value_type', ]
+             # 'label']
+    for ii, (color, fx) in enumerate(forecasts):
+        params = '\n'.join([str(getattr(fx, attr)) for attr in attrs])
+        xx = xpos + offset + ii * spacing
+        ax.text(xx, ypos, params, color=color, **kwargs)
 
 
 def make_concat_timeline():
@@ -213,6 +247,8 @@ def make_concat_timeline():
     format_xaxis(fig, ax)
     ax.set(title="Forecast runs concatenated into evaluation forecasts")
     remove_left_right_top_axes(ax)
+
+    add_stats_table(ax, (('b', hour_ahead_15min_int),))
 
     return fig
 
@@ -246,6 +282,8 @@ def make_concat_timeline_1h():
     ax.set(title="Forecast runs concatenated into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
+    add_stats_table(ax, (('b', hour_ahead_hour_int),))
+
     return fig
 
 
@@ -259,7 +297,7 @@ def make_merged_timeline():
     runs = [run1, run2, run3]
 
     # define merged forecasts
-    hour_ahead_15min_int = Forecast('1h', '15min', 4, '1h', 'any',
+    hour_ahead_15min_int = Forecast('1h', '15min', 12, '1h', 'any',
                                     '20180101 1300')
     hour_ahead_15min_int.duration = pd.Timedelta('3h')
     hour_ahead_15min_int.end = (hour_ahead_15min_int.start +
@@ -295,6 +333,10 @@ def make_merged_timeline():
     format_xaxis(fig, ax)
     ax.set(title="Forecast runs merged into evaluation forecasts")
     remove_left_right_top_axes(ax)
+
+    table_fxs = (('g', run1), ('b', hour_ahead_15min_int),
+                 ('r', hour_ahead_hour_int))
+    add_stats_table(ax, table_fxs)
 
     return fig
 
