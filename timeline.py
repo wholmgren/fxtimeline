@@ -10,6 +10,9 @@ mpl.rcParams['xtick.minor.width'] = 1.2  # 0.6 default
 mpl.rcParams['xtick.labelsize'] = 'x-large'  # medium default
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.transforms as mtrans
+from matplotlib.patches import PathPatch
+from matplotlib.text import TextPath
 import pandas as pd
 
 
@@ -121,16 +124,30 @@ def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
     #          y + start_tick_y_length, **kwargs)
 
 
+def curly(ax, x, y, scale, color):
+    # adapted from
+    # https://stackoverflow.com/questions/50039667/matplotlib-scale-text-curly-brackets
+    tp = TextPath((0, 0), "}", size=.2)
+    trans = mtrans.Affine2D().scale(1, scale) + \
+        mtrans.Affine2D().translate(0.5, y/5) + ax.transAxes
+
+    pp = PathPatch(tp, lw=0, fc=color, transform=trans)
+    ax.add_artist(pp)
+
+
 def annotate_with_brace(ax, xy, color):
     ax.annotate(r'$\}$', xy=xy, fontsize=64, textcoords='data',
                 horizontalalignment='left', verticalalignment='bottom',
                 rotation=90, color=color)
 
 
-def label_group(ax, label, x, y, color, bracesize=24, fontsize=18):
-    ax.annotate(r'$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
-                horizontalalignment='left', verticalalignment='center',
-                color=color)
+def label_group(ax, label, x, y, color, bracesize=None, fontsize=18):
+    if bracesize:
+        ax.annotate(r'$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
+                    horizontalalignment='left', verticalalignment='center',
+                    color=color)
+    # xx = mdates.date2num(pd.Timestamp(x) - pd.Timedelta('6h'))
+    # curly(ax, xx, y, 5, color)
     ax.annotate(label, xy=(pd.Timestamp(x) + pd.Timedelta('60min'), y),
                 fontsize=fontsize, textcoords='data',
                 horizontalalignment='left', verticalalignment='center',
