@@ -250,7 +250,7 @@ def make_concat_timeline():
     ax.set(title="Forecast runs concatenated into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
-    add_stats_table(ax, (('b', hour_ahead_15min_int),))
+    add_stats_table(ax, (('g', run1), ('b', hour_ahead_15min_int),))
 
     return fig
 
@@ -265,7 +265,7 @@ def make_concat_timeline_1h():
     runs = [run1, run2, run3]
 
     # define concat forecasts
-    hour_ahead_hour_int = Forecast('2h', '1h', 3, '1h', 'any', '20180101 1300')
+    hour_ahead_hour_int = Forecast('1h', '1h', 3, '1h', 'any', '20180101 1300')
 
     # draw each run
     for ii, run in enumerate(runs):
@@ -285,7 +285,7 @@ def make_concat_timeline_1h():
     ax.set(title="Forecast runs concatenated into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
-    add_stats_table(ax, (('b', hour_ahead_hour_int),))
+    add_stats_table(ax, (('g', run1), ('b', hour_ahead_hour_int),))
 
     return fig
 
