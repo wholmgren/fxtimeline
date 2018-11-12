@@ -3,6 +3,7 @@ mpl.use('agg')
 mpl.rcParams['lines.linewidth'] = 3  # 1.5 default
 mpl.rcParams['axes.linewidth'] = 1.6  # 0.8 default
 mpl.rcParams['axes.titlesize'] = 'xx-large'  # large default
+mpl.rcParams['figure.titlesize'] = 'xx-large'  # large default
 mpl.rcParams['xtick.major.size'] = 7  # 3.5 default
 mpl.rcParams['xtick.minor.size'] = 4  # 2 default
 mpl.rcParams['xtick.major.width'] = 1.6  # 0.8 default
@@ -142,12 +143,12 @@ def curly(ax, x, y, scale, color):
 
 
 def annotate_with_brace(ax, xy, color):
-    ax.annotate(r'$\}$', xy=xy, fontsize=64, textcoords='data',
+    ax.annotate(r'$\}$', xy=xy, fontsize=66, textcoords='data',
                 horizontalalignment='left', verticalalignment='bottom',
                 rotation=90, color=color)
 
 
-def label_group(ax, label, x, y, color, bracesize=None, fontsize=18):
+def label_group(ax, label, x, y, color, bracesize=None, fontsize=20):
     if bracesize:
         ax.annotate(r'$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
                     horizontalalignment='left', verticalalignment='center',
@@ -179,7 +180,7 @@ def remove_left_right_top_axes(ax):
 def initial_axes_setup():
     figsize = (11, 6)
     fig = plt.figure(figsize=figsize)
-    ax = fig.add_axes([.17, .12, .75, .8])
+    ax = fig.add_axes([.06, .12, .73, .8])
 
     # initial axes set up
     start = pd.Timestamp('20180101 1200')
@@ -198,17 +199,17 @@ def add_stats_table(ax, forecasts):
     forecasts: list of (color, Forecast) tuples
     """
     names = ['Lead time to start', 'Interval duration',
-             'Intervals / submission', 'Issue frequency', 'Value Type', ]
+             'Intervals / sub.', 'Issue frequency', 'Value Type', ]
              # 'Interval label']
 
-    xpos = .02
-    ypos = .87
+    xpos = .7
+    ypos = .8
     kwargs = dict(horizontalalignment='left', verticalalignment='top',
                   transform=ax.figure.transFigure, fontsize=12)
     ax.text(xpos, ypos, '\n'.join(names), **kwargs)
 
-    offset = 0.18
-    spacing = 0.07
+    offset = 0.15
+    spacing = 0.06
     attrs = ['lead_time_to_start_str', 'interval_duration_str',
              'intervals_per_submission', 'issue_frequency_str', 'value_type', ]
              # 'label']
@@ -239,9 +240,10 @@ def make_concat_timeline():
     draw_forecast_timeline(ax, len(runs), hour_ahead_15min_int, color='b')
 
     # add the labels
-    label_group(ax, 'Identically parsed\nforecast runs', '20180101 1730', 1,
+    label_time = '20180101 1700'
+    label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
                 'g', bracesize=90)
-    label_group(ax, 'A Forecast', '20180101 1730', 3, 'b')
+    label_group(ax, 'A Forecast', label_time, 3, 'b')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
@@ -273,9 +275,10 @@ def make_concat_timeline_1h():
     draw_forecast_timeline(ax, len(runs), hour_ahead_hour_int, color='b')
 
     # add the labels
-    label_group(ax, 'Identically parsed\nforecast runs', '20180101 1730', 1,
+    label_time = '20180101 1700'
+    label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
                 'g', bracesize=90)
-    label_group(ax, 'A Forecast', '20180101 1730', 3, 'b')
+    label_group(ax, 'A Forecast', label_time, 3, 'b')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
@@ -324,14 +327,15 @@ def make_merged_timeline():
     annotate_with_brace(ax, ('20180101 1600', 2), 'r')
 
     # add the labels
-    label_group(ax, 'Identically parsed\nforecast runs', '20180101 1730', 1,
+    label_time = '20180101 1700'
+    label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
                 'g', bracesize=90)
-    label_group(ax, 'A Forecast', '20180101 1730', 3, 'b')
-    label_group(ax, 'A Forecast', '20180101 1730', 4, 'r')
+    label_group(ax, 'A Forecast', label_time, 3, 'b')
+    label_group(ax, 'A Forecast', label_time, 4, 'r')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
-    ax.set(title="Forecast runs merged into evaluation forecasts")
+    fig.suptitle("Forecast runs merged into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
     table_fxs = (('g', run1), ('b', hour_ahead_15min_int),
