@@ -122,13 +122,13 @@ def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
 
 
 def annotate_with_brace(ax, xy, color):
-    ax.annotate('$\}$', xy=xy, fontsize=64, textcoords='data',
+    ax.annotate(r'$\}$', xy=xy, fontsize=64, textcoords='data',
                 horizontalalignment='left', verticalalignment='bottom',
                 rotation=90, color=color)
 
 
 def label_group(ax, label, x, y, color, bracesize=24, fontsize=18):
-    ax.annotate('$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
+    ax.annotate(r'$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
                 horizontalalignment='left', verticalalignment='center',
                 color=color)
     ax.annotate(label, xy=(pd.Timestamp(x) + pd.Timedelta('60min'), y),
@@ -196,7 +196,7 @@ def make_concat_timeline():
     ax.set(title="Forecast runs concatenated into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
-    fig.savefig('timeline_concat.png')
+    return fig
 
 
 def make_concat_timeline_1h():
@@ -228,7 +228,7 @@ def make_concat_timeline_1h():
     ax.set(title="Forecast runs concatenated into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
-    fig.savefig('timeline_concat_1h.png')
+    return fig
 
 
 def make_merged_timeline():
@@ -278,10 +278,18 @@ def make_merged_timeline():
     ax.set(title="Forecast runs merged into evaluation forecasts")
     remove_left_right_top_axes(ax)
 
-    fig.savefig('timeline_merged.png')
+    return fig
 
 
 if __name__ == '__main__':
-    make_concat_timeline()
-    make_concat_timeline_1h()
-    make_merged_timeline()
+    fig = make_concat_timeline()
+    fig.savefig('timeline_concat.svg')
+    fig.savefig('timeline_concat.png')
+
+    fig = make_concat_timeline_1h()
+    fig.savefig('timeline_concat_1h.svg')
+    fig.savefig('timeline_concat_1h.png')
+
+    fig = make_merged_timeline()
+    fig.savefig('timeline_merged.svg')
+    fig.savefig('timeline_merged.png')

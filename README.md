@@ -3,8 +3,8 @@ fxtimeline
 
 `python timeline.py` will create the following images.
 
-timeline_concat.png
--------------------
+timeline_concat
+---------------
 
 The figure below depicts the concatenation of three forecast runs (green) into
 a single evaluation forecast (blue). The parameters are:
@@ -17,10 +17,11 @@ a single evaluation forecast (blue). The parameters are:
 6.  Interval label: Left
 
 ![timeline concat](timeline_concat.png)
+![timeline concat](timeline_concat.svg)
 
 
-timeline_concat_1h.png
-----------------------
+timeline_concat_1h
+------------------
 
 The figure below depicts the concatenation of three forecast runs (green) into
 a single evaluation forecast (blue). The parameters are:
@@ -33,10 +34,11 @@ a single evaluation forecast (blue). The parameters are:
 6.  Interval label: Left
 
 ![timeline concat 1h](timeline_concat_1h.png)
+![timeline concat 1h](timeline_concat_1h.svg)
 
 
-timeline_merged.png
--------------------
+timeline_merged
+---------------
 
 The figure below depicts three forecast runs (green) merged into
 two different evaluation forecasts (blue, red).
@@ -69,6 +71,7 @@ The red evaluation forecast parameters are:
 6.  Interval label: Left
 
 ![timeline merged](timeline_merged.png)
+![timeline merged](timeline_merged.svg)
 
 
 Requirements
