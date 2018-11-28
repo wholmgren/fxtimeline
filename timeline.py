@@ -22,7 +22,7 @@ FX_LABEL = 'Forecast\nEvalution\nTimeseries'
 VALUE_TYPE = 'mean'
 VARIABLE = 'Power'
 SITE = 'Plant X'
-BRACESIZE = 100
+VERTICAL_BRACESIZE = 100
 
 
 class Forecast:
@@ -155,7 +155,7 @@ def curly(ax, x, y, scale, color):
 
 
 def annotate_with_brace(ax, xy, color):
-    ax.annotate(r'$\}$', xy=xy, fontsize=66, textcoords='data',
+    ax.annotate(r'$\}$', xy=xy, fontsize=74, textcoords='data',
                 horizontalalignment='left', verticalalignment='bottom',
                 rotation=90, color=color)
 
@@ -190,7 +190,7 @@ def remove_left_right_top_axes(ax):
 
 
 def initial_axes_setup():
-    figsize = (11.5, 6.5)
+    figsize = (12, 6.5)
     fig = plt.figure(figsize=figsize)
     ax = fig.add_axes([.06, .12, .73, .8])
 
@@ -258,7 +258,7 @@ def make_concat_timeline():
     # add the labels
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
-                'g', bracesize=BRACESIZE)
+                'g', bracesize=VERTICAL_BRACESIZE)
     label_group(ax, FX_LABEL, label_time, 3, 'b')
 
     # format x axis, title, remove other axes
@@ -295,7 +295,7 @@ def make_concat_timeline_1h():
     # add the labels
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
-                'g', bracesize=BRACESIZE)
+                'g', bracesize=VERTICAL_BRACESIZE)
     label_group(ax, FX_LABEL, label_time, 3, 'b')
 
     # format x axis, title, remove other axes
@@ -349,7 +349,7 @@ def make_merged_timeline():
     # add the labels
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
-                'g', bracesize=BRACESIZE)
+                'g', bracesize=VERTICAL_BRACESIZE)
     label_group(ax, FX_LABEL, label_time, 3, 'b')
     label_group(ax, FX_LABEL, label_time, 4, 'r')
 
