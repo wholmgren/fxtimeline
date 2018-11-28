@@ -22,6 +22,7 @@ FX_LABEL = 'Forecast\nEvalution\nTimeseries'
 VALUE_TYPE = 'mean'
 VARIABLE = 'Power'
 SITE = 'Plant X'
+BRACESIZE = 100
 
 
 class Forecast:
@@ -189,7 +190,7 @@ def remove_left_right_top_axes(ax):
 
 
 def initial_axes_setup():
-    figsize = (11, 6)
+    figsize = (11.5, 6.5)
     fig = plt.figure(figsize=figsize)
     ax = fig.add_axes([.06, .12, .73, .8])
 
@@ -257,12 +258,13 @@ def make_concat_timeline():
     # add the labels
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
-                'g', bracesize=90)
+                'g', bracesize=BRACESIZE)
     label_group(ax, FX_LABEL, label_time, 3, 'b')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
-    ax.set(title="Forecast runs concatenated into evaluation forecasts")
+    title = "Forecast runs concatenated into forecast evaluation timeseries"
+    ax.set(title=title)
     remove_left_right_top_axes(ax)
 
     add_stats_table(ax, (('g', run1), ('b', hour_ahead_15min_int),))
@@ -293,12 +295,13 @@ def make_concat_timeline_1h():
     # add the labels
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
-                'g', bracesize=90)
+                'g', bracesize=BRACESIZE)
     label_group(ax, FX_LABEL, label_time, 3, 'b')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
-    ax.set(title="Forecast runs concatenated into evaluation forecasts")
+    title = "Forecast runs concatenated into forecast evaluation timeseries"
+    ax.set(title=title)
     remove_left_right_top_axes(ax)
 
     add_stats_table(ax, (('g', run1), ('b', hour_ahead_hour_int),))
@@ -346,13 +349,14 @@ def make_merged_timeline():
     # add the labels
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
-                'g', bracesize=90)
+                'g', bracesize=BRACESIZE)
     label_group(ax, FX_LABEL, label_time, 3, 'b')
     label_group(ax, FX_LABEL, label_time, 4, 'r')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
-    fig.suptitle("Forecast runs merged into evaluation forecasts")
+    title = "Forecast runs merged into forecast evaluation timeseries"
+    ax.set(title=title)
     remove_left_right_top_axes(ax)
 
     table_fxs = (('g', run1), ('b', hour_ahead_15min_int),
