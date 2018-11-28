@@ -115,7 +115,7 @@ class Forecast:
 
 def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
                            interval_tick_y_length=0.125, show_lead_time=False,
-                           show_last_tick=False, **kwargs):
+                           show_last_tick=False, trailing_time=None, **kwargs):
     if show_lead_time:
         dashing = (2, 1)
         ax.hlines(y, xmin=forecast.issue_time, xmax=forecast.start,
@@ -137,6 +137,14 @@ def draw_forecast_timeline(ax, y, forecast, start_tick_y_length=0.2,
         # last tick should be longer and dashed
         ax.vlines(intervals[-1], y - start_tick_y_length,
                   y + start_tick_y_length, linestyles=(0, (1, 1)), **kwargs)
+
+    if trailing_time is not None:
+        dashing = (2, 1)
+        xmax = forecast.end + pd.Timedelta(trailing_time)
+        ax.hlines(y, xmin=forecast.end, xmax=xmax,
+                  linestyles=(0, dashing), **kwargs)
+        # ax.vlines(forecast.end, y - start_tick_y_length,
+        #           y + start_tick_y_length, linestyles=(0.5, dashing), **kwargs)
     # arrow_start = forecast.end
     # ax.arrow(forecast.start, y - start_tick_y_length,
     #          y + start_tick_y_length, **kwargs)
@@ -250,10 +258,16 @@ def make_concat_timeline():
 
     # draw each run
     for ii, run in enumerate(runs):
-        draw_forecast_timeline(ax, ii, run, color='g', show_lead_time=True)
+        draw_forecast_timeline(ax, ii, run, color='g', show_lead_time=True,
+                               trailing_time='1h')
 
     # draw concat forecast
     draw_forecast_timeline(ax, len(runs), hour_ahead_15min_int, color='b')
+
+    # indicate segments of runs for blue forecast
+    # annotate_with_brace(ax, ('20180101 1300', 0), 'b')
+    # annotate_with_brace(ax, ('20180101 1400', 1), 'b')
+    # annotate_with_brace(ax, ('20180101 1500', 2), 'b')
 
     # add the labels
     label_time = '20180101 1700'
