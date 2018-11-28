@@ -277,7 +277,7 @@ def make_concat_timeline():
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
-    title = "Forecast runs concatenated into forecast evaluation timeseries"
+    title = "Forecast runs concatenated into a forecast evaluation timeseries"
     ax.set(title=title)
     remove_left_right_top_axes(ax)
 
@@ -314,7 +314,7 @@ def make_concat_timeline_1h():
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
-    title = "Forecast runs concatenated into forecast evaluation timeseries"
+    title = "Forecast runs concatenated into a forecast evaluation timeseries"
     ax.set(title=title)
     remove_left_right_top_axes(ax)
 
