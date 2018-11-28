@@ -160,7 +160,7 @@ def annotate_with_brace(ax, xy, color):
                 rotation=90, color=color)
 
 
-def label_group(ax, label, x, y, color, bracesize=None, fontsize=16):
+def label_group(ax, label, x, y, color, bracesize=None, fontsize=14):
     if bracesize:
         ax.annotate(r'$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
                     horizontalalignment='left', verticalalignment='center',
