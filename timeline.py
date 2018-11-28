@@ -17,6 +17,13 @@ from matplotlib.text import TextPath
 import pandas as pd
 
 
+# default parameters
+FX_LABEL = 'Forecast\nEvalution\nTimeseries'
+VALUE_TYPE = 'mean'
+VARIABLE = 'Power'
+SITE = 'Plant X'
+
+
 class Forecast:
     """
     Constrains the definition of a forecast in the Solar Forecast Arbiter.
@@ -77,7 +84,8 @@ class Forecast:
     """
     def __init__(self, lead_time_to_start, interval_duration,
                  intervals_per_submission, issue_frequency, value_type,
-                 start, kind=None, label='left', units=''):
+                 start, kind=None, interval_label='left', units='',
+                 variable=VARIABLE, site=SITE):
 
         self.lead_time_to_start = pd.Timedelta(lead_time_to_start)
         self.lead_time_to_start_str = lead_time_to_start
@@ -88,7 +96,10 @@ class Forecast:
         self.issue_frequency_str = issue_frequency
         self.duration = \
             pd.Timedelta(interval_duration) * intervals_per_submission
+        self.interval_label = interval_label
         self.value_type = value_type
+        self.variable = variable
+        self.site = site
         self.start = pd.Timestamp(start)
         self.start_str = start
         # For left-labeling, forecast is exclusive of end.
@@ -148,14 +159,14 @@ def annotate_with_brace(ax, xy, color):
                 rotation=90, color=color)
 
 
-def label_group(ax, label, x, y, color, bracesize=None, fontsize=20):
+def label_group(ax, label, x, y, color, bracesize=None, fontsize=16):
     if bracesize:
         ax.annotate(r'$\}$', xy=(x, y), fontsize=bracesize, textcoords='data',
                     horizontalalignment='left', verticalalignment='center',
                     color=color)
     # xx = mdates.date2num(pd.Timestamp(x) - pd.Timedelta('6h'))
     # curly(ax, xx, y, 5, color)
-    ax.annotate(label, xy=(pd.Timestamp(x) + pd.Timedelta('60min'), y),
+    ax.annotate(label, xy=(pd.Timestamp(x) + pd.Timedelta('50min'), y),
                 fontsize=fontsize, textcoords='data',
                 horizontalalignment='left', verticalalignment='center',
                 color=color)
@@ -199,20 +210,24 @@ def add_stats_table(ax, forecasts):
     forecasts: list of (color, Forecast) tuples
     """
     names = ['Lead time to start', 'Interval duration',
-             'Intervals / sub.', 'Issue frequency', 'Value Type', ]
-             # 'Interval label']
+             'Intervals / sub.', 'Issue frequency', 'Interval label',
+             'Value Type', 'Variable', 'Site'
+             ]
+    attrs = ['lead_time_to_start_str', 'interval_duration_str',
+             'intervals_per_submission', 'issue_frequency_str',
+             'interval_label', 'value_type', 'variable', 'site'
+             ]
 
-    xpos = .7
+    xpos = .67
     ypos = .8
     kwargs = dict(horizontalalignment='left', verticalalignment='top',
-                  transform=ax.figure.transFigure, fontsize=12)
+                  transform=ax.figure.transFigure, fontsize=12,
+                  linespacing=1.25)
     ax.text(xpos, ypos, '\n'.join(names), **kwargs)
 
     offset = 0.15
     spacing = 0.06
-    attrs = ['lead_time_to_start_str', 'interval_duration_str',
-             'intervals_per_submission', 'issue_frequency_str', 'value_type', ]
-             # 'label']
+
     for ii, (color, fx) in enumerate(forecasts):
         params = '\n'.join([str(getattr(fx, attr)) for attr in attrs])
         xx = xpos + offset + ii * spacing
@@ -223,13 +238,13 @@ def make_concat_timeline():
     fig, ax = initial_axes_setup()
 
     # define forecast runs
-    run1 = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1300')
-    run2 = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1400')
-    run3 = Forecast('1h', '15min', 4, '1h', 'any', '20180101 1500')
+    run1 = Forecast('1h', '15min', 4, '1h', VALUE_TYPE, '20180101 1300')
+    run2 = Forecast('1h', '15min', 4, '1h', VALUE_TYPE, '20180101 1400')
+    run3 = Forecast('1h', '15min', 4, '1h', VALUE_TYPE, '20180101 1500')
     runs = [run1, run2, run3]
 
     # define concat forecasts
-    hour_ahead_15min_int = Forecast('1h', '15min', 12, '1h', 'any',
+    hour_ahead_15min_int = Forecast('1h', '15min', 12, '1h', VALUE_TYPE,
                                     '20180101 1300')
 
     # draw each run
@@ -243,7 +258,7 @@ def make_concat_timeline():
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
                 'g', bracesize=90)
-    label_group(ax, 'A Forecast', label_time, 3, 'b')
+    label_group(ax, FX_LABEL, label_time, 3, 'b')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
@@ -259,13 +274,14 @@ def make_concat_timeline_1h():
     fig, ax = initial_axes_setup()
 
     # define forecast runs
-    run1 = Forecast('1h', '1h', 1, '1h', 'any', '20180101 1300')
-    run2 = Forecast('1h', '1h', 1, '1h', 'any', '20180101 1400')
-    run3 = Forecast('1h', '1h', 1, '1h', 'any', '20180101 1500')
+    run1 = Forecast('1h', '1h', 1, '1h', VALUE_TYPE, '20180101 1300')
+    run2 = Forecast('1h', '1h', 1, '1h', VALUE_TYPE, '20180101 1400')
+    run3 = Forecast('1h', '1h', 1, '1h', VALUE_TYPE, '20180101 1500')
     runs = [run1, run2, run3]
 
     # define concat forecasts
-    hour_ahead_hour_int = Forecast('1h', '1h', 3, '1h', 'any', '20180101 1300')
+    hour_ahead_hour_int = Forecast('1h', '1h', 3, '1h', VALUE_TYPE,
+                                   '20180101 1300')
 
     # draw each run
     for ii, run in enumerate(runs):
@@ -278,7 +294,7 @@ def make_concat_timeline_1h():
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
                 'g', bracesize=90)
-    label_group(ax, 'A Forecast', label_time, 3, 'b')
+    label_group(ax, FX_LABEL, label_time, 3, 'b')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
@@ -294,19 +310,20 @@ def make_merged_timeline():
     fig, ax = initial_axes_setup()
 
     # define forecast runs
-    run1 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1200')
-    run2 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1300')
-    run3 = Forecast(0, '15min', 12, '1h', 'any', '20180101 1400')
+    run1 = Forecast(0, '15min', 12, '1h', VALUE_TYPE, '20180101 1200')
+    run2 = Forecast(0, '15min', 12, '1h', VALUE_TYPE, '20180101 1300')
+    run3 = Forecast(0, '15min', 12, '1h', VALUE_TYPE, '20180101 1400')
     runs = [run1, run2, run3]
 
     # define merged forecasts
-    hour_ahead_15min_int = Forecast('1h', '15min', 12, '1h', 'any',
+    hour_ahead_15min_int = Forecast('1h', '15min', 12, '1h', VALUE_TYPE,
                                     '20180101 1300')
     hour_ahead_15min_int.duration = pd.Timedelta('3h')
     hour_ahead_15min_int.end = (hour_ahead_15min_int.start +
                                 hour_ahead_15min_int.duration)
 
-    hour_ahead_hour_int = Forecast('2h', '1h', 3, '1h', 'any', '20180101 1400')
+    hour_ahead_hour_int = Forecast('2h', '1h', 3, '1h', VALUE_TYPE,
+                                   '20180101 1400')
 
     # draw each run
     for ii, run in enumerate(runs):
@@ -330,8 +347,8 @@ def make_merged_timeline():
     label_time = '20180101 1700'
     label_group(ax, 'Identically parsed\nforecast runs', label_time, 1,
                 'g', bracesize=90)
-    label_group(ax, 'A Forecast', label_time, 3, 'b')
-    label_group(ax, 'A Forecast', label_time, 4, 'r')
+    label_group(ax, FX_LABEL, label_time, 3, 'b')
+    label_group(ax, FX_LABEL, label_time, 4, 'r')
 
     # format x axis, title, remove other axes
     format_xaxis(fig, ax)
